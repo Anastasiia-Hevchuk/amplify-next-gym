@@ -8,54 +8,44 @@ import { Amplify } from "aws-amplify";
 import outputs from "@/amplify_outputs.json";
 import "@aws-amplify/ui-react/styles.css";
 import { useAuthenticator } from "@aws-amplify/ui-react";
+import { fetchUserAttributes } from "aws-amplify/auth";
+import { useRouter } from "next/navigation";
 
 Amplify.configure(outputs);
 
-const client = generateClient<Schema>();
-
 export default function App() {
-  const [todos, setTodos] = useState<Array<Schema["Todo"]["type"]>>([]);
-  const { user, signOut } = useAuthenticator();
+  const router = useRouter();
 
-  function listTodos() {
-    client.models.Todo.observeQuery().subscribe({
-      next: (data) => setTodos([...data.items]),
-    });
-  }
+  const { signOut } = useAuthenticator();
 
   useEffect(() => {
-    listTodos();
+    async function redirectAfterLogin() {
+      try {
+        const user = await fetchUserAttributes();
+        const role = user['custom:role'];
+
+        if (role === 'trainer') {
+          router.push('/setup/trainer-profile');
+        } else if (role === 'client') {
+          router.push('/setup/client-profile');
+        } else {
+          router.push('/');
+        }
+      } catch (error) {
+        console.error('Error fetching user:', error);
+        router.push('/');
+      }
+    }
+
+    redirectAfterLogin();
   }, []);
 
-  function createTodo() {
-    client.models.Todo.create({
-      content: window.prompt("Todo content"),
-    });
-  }
-
-  function deleteTodo(id: string) {
-    client.models.Todo.delete({ id });
-  }
-
   return (
-    <main>
-      <h1>{user?.signInDetails?.loginId}'s todos</h1>
-      <button onClick={createTodo}>+ new</button>
-      <ul>
-        {todos.map((todo) => (
-          <li onClick={() => deleteTodo(todo.id)} key={todo.id}>
-            {todo.content}
-          </li>
-        ))}
-      </ul>
+    <main className="flex w-full">
       <div>
         🥳 App successfully hosted. Try creating a new todo.
         <br />
-        <a href="https://docs.amplify.aws/nextjs/start/quickstart/nextjs-app-router-client-components/">
-          Review next steps of this tutorial.
-        </a>
       </div>
-
       <button onClick={signOut}>Sign out</button>
     </main>
   );

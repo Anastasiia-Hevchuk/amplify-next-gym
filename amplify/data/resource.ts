@@ -7,10 +7,74 @@ specifies that any user authenticated via an API key can "create", "read",
 "update", and "delete" any "Todo" records.
 =========================================================================*/
 const schema = a.schema({
-  Todo: a
+  Client: a
     .model({
-      content: a.string(),
-    }).authorization(allow => [allow.owner()]),
+      userId: a.id(),
+      gym: a.belongsTo("Gym", "gymId"),
+      gymId: a.id(),
+      scheduleId: a.id(),
+      feedbackId: a.id(),
+      schedule: a.belongsTo("Schedule", "scheduleId"),
+      feedback: a.belongsTo("Feedback", "feedbackId"),
+      name: a.string(),
+      email: a.string(),
+      role: a.string(),
+      profilePictureUrl: a.string(),
+      preferences: a.string().array(),
+    })
+    .authorization((allow) => [allow.owner()]),
+
+  Trainer: a
+    .model({
+      trainerId: a.id(),
+      gym: a.belongsTo("Gym", "gymId"),
+      schedule: a.belongsTo("Schedule", "scheduleId"),
+      feedback: a.belongsTo("Feedback", "feedbackId"),
+      name: a.string(),
+      email: a.string(),
+      role: a.string(),
+      bio: a.string(),
+      profilePictureUrl: a.string(),
+      skills: a.string().array(),
+      availability: a.string().array(),
+    })
+    .authorization((allow) => [allow.owner(), allow.groups(["admin"])]),
+
+  Gym: a.model({
+    gymId: a.id(),
+    name: a.string(),
+    location: a.string(),
+    description: a.string(),
+    images: a.string().array(),
+    trainers: a.hasMany("Trainer", "gymId"),
+    clients: a.hasMany("Client", "gymId"),
+  }),
+
+  Schedule: a
+    .model({
+      scheduleId: a.id(),
+      trainer: a.belongsTo("Trainer", "trainerId"),
+      client: a.belongsTo("Client", "userId"),
+      feedback: a.belongsTo("Feedback", "feedbackId"),
+      date: a.string(),
+      startTime: a.string(),
+      endTime: a.string(),
+      status: a.string(),
+      notes: a.string(),
+    })
+    .authorization((allow) => [allow.owner(), allow.groups(["admin"])]),
+
+  Feedback: a
+    .model({
+      feedbackId: a.id(),
+      trainer: a.belongsTo("Trainer", "trainerId"),
+      client: a.belongsTo("Client", "userId"),
+      session: a.belongsTo("Schedule", "scheduleId"),
+      rating: a.integer(),
+      comments: a.string(),
+      sentiment: a.string(),
+    })
+    .authorization((allow) => [allow.owner(), allow.groups(["admin"])]),
 });
 
 export type Schema = ClientSchema<typeof schema>;
@@ -18,7 +82,7 @@ export type Schema = ClientSchema<typeof schema>;
 export const data = defineData({
   schema,
   authorizationModes: {
-    defaultAuthorizationMode: 'userPool',
+    defaultAuthorizationMode: "userPool",
     apiKeyAuthorizationMode: {
       expiresInDays: 30,
     },
