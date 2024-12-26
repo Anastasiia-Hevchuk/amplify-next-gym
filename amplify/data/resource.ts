@@ -10,12 +10,9 @@ const schema = a.schema({
   Client: a
     .model({
       userId: a.id(),
-      gym: a.belongsTo("Gym", "gymId"),
-      gymId: a.id(),
-      scheduleId: a.id(),
-      feedbackId: a.id(),
-      schedule: a.belongsTo("Schedule", "scheduleId"),
-      feedback: a.belongsTo("Feedback", "feedbackId"),
+      gym: a.belongsTo("Gym", "userId"),
+      schedule: a.belongsTo("Schedule", "userId"),
+      feedback: a.belongsTo("Feedback", "userId"),
       name: a.string(),
       email: a.string(),
       role: a.string(),
@@ -27,9 +24,9 @@ const schema = a.schema({
   Trainer: a
     .model({
       trainerId: a.id(),
-      gym: a.belongsTo("Gym", "gymId"),
-      schedule: a.belongsTo("Schedule", "scheduleId"),
-      feedback: a.belongsTo("Feedback", "feedbackId"),
+      gym: a.belongsTo("Gym", "trainerId"),
+      schedule: a.belongsTo("Schedule", "trainerId"),
+      feedback: a.belongsTo("Feedback", "trainerId"),
       name: a.string(),
       email: a.string(),
       role: a.string(),
@@ -40,36 +37,40 @@ const schema = a.schema({
     })
     .authorization((allow) => [allow.owner(), allow.groups(["admin"])]),
 
-  Gym: a.model({
-    gymId: a.id(),
-    name: a.string(),
-    location: a.string(),
-    description: a.string(),
-    images: a.string().array(),
-    trainers: a.hasMany("Trainer", "gymId"),
-    clients: a.hasMany("Client", "gymId"),
-  }),
+  Gym: a
+    .model({
+      gymId: a.id(),
+      name: a.string(),
+      location: a.string(),
+      description: a.string(),
+      images: a.string().array(),
+      trainers: a.hasMany("Trainer", "trainerId"),
+      clients: a.hasMany("Client", "userId"),
+    })
+    .authorization((allow) => [allow.owner(), allow.groups(["admin"])]),
 
   Schedule: a
     .model({
       scheduleId: a.id(),
-      trainer: a.belongsTo("Trainer", "trainerId"),
-      client: a.belongsTo("Client", "userId"),
-      feedback: a.belongsTo("Feedback", "feedbackId"),
+      trainer: a.hasMany("Trainer", "trainerId"),
+      client: a.hasMany("Client", "userId"),
+      feedback: a.hasMany("Feedback", "feedbackId"),
       date: a.string(),
       startTime: a.string(),
       endTime: a.string(),
       status: a.string(),
-      notes: a.string(),
+      notes: a
+        .string()
+        .authorization((allow) => [allow.owner(), allow.groups(["admin"])]),
     })
     .authorization((allow) => [allow.owner(), allow.groups(["admin"])]),
 
   Feedback: a
     .model({
       feedbackId: a.id(),
-      trainer: a.belongsTo("Trainer", "trainerId"),
-      client: a.belongsTo("Client", "userId"),
-      session: a.belongsTo("Schedule", "scheduleId"),
+      trainer: a.hasMany("Trainer", "trainerId"),
+      client: a.hasMany("Client", "userId"),
+      session: a.belongsTo("Schedule", "feedbackId"),
       rating: a.integer(),
       comments: a.string(),
       sentiment: a.string(),
