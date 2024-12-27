@@ -15,30 +15,39 @@ Amplify.configure(outputs);
 
 export default function App() {
   const router = useRouter();
-
+  // const client = generateClient<Schema>();
   const { signOut } = useAuthenticator();
 
-  useEffect(() => {
-    async function redirectAfterLogin() {
-      try {
-        const user = await fetchUserAttributes();
-        const role = user['custom:role'];
+  // const fetchTodos = async () => {
+  //   const { data: clients, errors } = await client.models.Client.list();
+  //   console.log("🚀 ~ fetchTodos ~ clients:", clients)
+  // };
 
-        if (role === 'trainer') {
-          router.push('/setup/trainer-profile');
-        } else if (role === 'client') {
-          router.push('/setup/client-profile');
-        } else {
-          router.push('/');
-        }
-      } catch (error) {
-        console.error('Error fetching user:', error);
-        router.push('/');
-      }
-    }
+  // useEffect(() => {
+  //   fetchTodos();
+  // }, []);
 
-    redirectAfterLogin();
-  }, []);
+  // useEffect(() => {
+  //   async function redirectAfterLogin() {
+  //     try {
+  //       const user = await fetchUserAttributes();
+  //       const role = user['custom:role'];
+
+  //       if (role === 'trainer') {
+  //         router.push('/setup/trainer-profile');
+  //       } else if (role === 'client') {
+  //         router.push('/setup/client-profile');
+  //       } else {
+  //         router.push('/');
+  //       }
+  //     } catch (error) {
+  //       console.error('Error fetching user:', error);
+  //       router.push('/');
+  //     }
+  //   }
+
+  //   redirectAfterLogin();
+  // }, []);
 
   return (
     <main className="flex w-full">
@@ -46,7 +55,14 @@ export default function App() {
         🥳 App successfully hosted. Try creating a new todo.
         <br />
       </div>
-      <button onClick={signOut}>Sign out</button>
+      <button
+        onClick={() => {
+          signOut();
+          router.push("/");
+        }}
+      >
+        Sign out
+      </button>
     </main>
   );
 }
