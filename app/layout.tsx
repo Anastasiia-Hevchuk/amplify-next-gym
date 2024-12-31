@@ -29,7 +29,7 @@ export default function RootLayout({
       const user = await signUp({
         username,
         password,
-        ...attributes,
+        options: { userAttributes: { ...attributes } },
       });
 
       const newSignUpData = {

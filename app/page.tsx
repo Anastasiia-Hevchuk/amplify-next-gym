@@ -10,6 +10,7 @@ import "@aws-amplify/ui-react/styles.css";
 import { useAuthenticator } from "@aws-amplify/ui-react";
 import { useRouter } from "next/navigation";
 import { SignUpInput } from "aws-amplify/auth";
+import { fetchUserAttributes } from "aws-amplify/auth";
 
 Amplify.configure(outputs);
 
@@ -17,9 +18,11 @@ export default function App() {
   const router = useRouter();
   const client = generateClient<Schema>();
   const { user, signOut } = useAuthenticator();
-  console.log("🚀 ~ App ~ user:", user)
+  console.log("🚀 ~ App ~ user:", user);
   const fetchTodos = async () => {
     let signUpData = {} as SignUpInput;
+    const datas = await fetchUserAttributes();
+    console.log("🚀 ~ fetchTodos ~ datas:", datas)
     const storedData = localStorage.getItem("signUpData");
     if (storedData) {
       signUpData = JSON.parse(storedData);
