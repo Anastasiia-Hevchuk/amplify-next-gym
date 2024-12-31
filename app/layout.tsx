@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Amplify } from "aws-amplify";
 import "./app.css";
 import { Authenticator } from "@aws-amplify/ui-react";
@@ -9,14 +9,44 @@ import outputs from "@/amplify_outputs.json";
 import Navigation from "./components/navbar";
 import { ThemeProvider } from "@mui/material";
 import { darkTheme } from "./common/Theme";
+import { signUp, SignUpInput } from "aws-amplify/auth";
 
 Amplify.configure(outputs);
+
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  
+  const [signUpData, setSignUpData] = useState({} as SignUpInput);
+  console.log("🚀 ~ signUpData:", signUpData);
+
+  const customSignUp = async (formData: SignUpInput) => {
+    try {
+      const { username, password, options } = formData;
+      const attributes = options?.userAttributes;
+
+      const user = await signUp({
+        username,
+        password,
+        ...attributes,
+      });
+
+      const newSignUpData = {
+        username,
+        password,
+        options: { userAttributes: { ...attributes, sub: user.userId } },
+      };
+
+      setSignUpData(newSignUpData);
+      localStorage.setItem("signUpData", JSON.stringify(newSignUpData));
+
+      return user;
+    } catch (error) {
+      console.error("Error during custom sign-up:", error);
+      throw error;
+    }
+  };
 
   return (
     <html lang="en">
@@ -48,9 +78,32 @@ export default function RootLayout({
                           <option value="client">Client</option>
                         </select>
                       </div>
+                      <div className="mt-4">
+                        <label
+                          htmlFor="gender"
+                          className="block text-sm font-medium text-gray-700 mb-1"
+                        >
+                          Gender
+                        </label>
+                        <select
+                          id="gender"
+                          name="gender"
+                          required
+                          defaultValue="client"
+                          className="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        >
+                          <option value="male">Male</option>
+                          <option value="female">Female</option>
+                        </select>
+                      </div>
                     </>
                   );
                 },
+              },
+            }}
+            services={{
+              async handleSignUp(formData: SignUpInput) {
+                return customSignUp(formData);
               },
             }}
           >

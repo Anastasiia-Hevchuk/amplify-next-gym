@@ -20,7 +20,7 @@ import { useAuthenticator } from "@aws-amplify/ui-react";
 const pages = [
   { title: "About us", path: "/about" },
   { title: "Trainers", path: "/trainers" },
-  { title: "Blog", path: "/about" },
+  { title: "Blog", path: "/blog" },
 ];
 
 function ResponsiveAppBar() {
@@ -131,7 +131,6 @@ function ResponsiveAppBar() {
               ))}
             </Menu>
           </Box>
-          {/* <AdbIcon sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} /> */}
           <Typography
             variant="h5"
             noWrap
@@ -170,7 +169,7 @@ function ResponsiveAppBar() {
           <Box sx={{ flexGrow: 0 }}>
             <Tooltip title="Open settings">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
+                <Avatar alt="Remy Sharp" src="/images/avatar.png" />
               </IconButton>
             </Tooltip>
             <Menu
