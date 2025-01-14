@@ -18,36 +18,6 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [signUpData, setSignUpData] = useState({} as SignUpInput);
-  console.log("🚀 ~ signUpData:", signUpData);
-
-  const customSignUp = async (formData: SignUpInput) => {
-    try {
-      const { username, password, options } = formData;
-      const attributes = options?.userAttributes;
-
-      const user = await signUp({
-        username,
-        password,
-        options: { userAttributes: { ...attributes } },
-      });
-
-      const newSignUpData = {
-        username,
-        password,
-        options: { userAttributes: { ...attributes, sub: user.userId } },
-      };
-
-      setSignUpData(newSignUpData);
-      localStorage.setItem("signUpData", JSON.stringify(newSignUpData));
-
-      return user;
-    } catch (error) {
-      console.error("Error during custom sign-up:", error);
-      throw error;
-    }
-  };
-
   return (
     <html lang="en">
       <ThemeProvider theme={darkTheme}>
@@ -101,14 +71,11 @@ export default function RootLayout({
                 },
               },
             }}
-            services={{
-              async handleSignUp(formData: SignUpInput) {
-                return customSignUp(formData);
-              },
-            }}
           >
             <Navigation />
-            <main className="flex-1 flex flex-col p-4">{children}</main>
+            <main className="w-full h-full flex-1 flex flex-col">
+              {children}
+            </main>
           </Authenticator>
         </body>
       </ThemeProvider>
